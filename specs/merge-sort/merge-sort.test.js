@@ -7,8 +7,42 @@
 */
 
 const mergeSort = (nums) => {
-  // code goes here
+  // base case ==> return if Array.length === 1 || 0 
+  if (nums.length < 2) {
+    return nums;
+  }
+
+  // Break into two smaller arrays
+  const length = nums.length;
+  const middle = Math.floor(length / 2);
+  const left = nums.slice(0, middle);
+  const right = nums.slice(middle);
+
+  // Call mergeSort on left and right
+  const sortedLeft = mergeSort(left);
+  const sortedRight = mergeSort(right);
+
+  // return the merge of left and right
+  return merge(sortedLeft, sortedRight);
+
 };
+
+const merge = (left, right) => {
+  // return one sorted array
+  // REMEMBER!! left & right are already sorted
+
+  const results = [];
+  while (left.length && right.length) {
+    if (left[0] <= right[0]) {
+      results.push(left.shift());
+    } else {
+      results.push(right.shift());
+    }
+  }
+
+  return results.concat(left, right);
+  // results is already sorted. Call concat when left or right is empty. Calling concat on an empty array does nothing so that will be ignored and the remaining items in the array that is not empty will be pushed onto the end of results in the correct order.
+}
 
 // unit tests
 // do not modify the below code

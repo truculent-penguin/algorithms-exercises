@@ -1,4 +1,6 @@
 /*
+  5! = 5*(4*(3*(2*1)))
+
   Make a function that computes a factorial recursively.
   A factorial is when you take a number n and multiply by each preceding integer until you hit one.
   n * (n-1) * (n-2) ... * 3 * 2 * 1
@@ -10,7 +12,20 @@
   factorial(3) = 6 
 */
 
-function factorial(n) {}
+function factorial(n) {
+
+  // let prod = 1
+  // for (let i=1; i<=n; i++) {
+  //   prod *= i
+  // }
+  // return prod
+
+  if (n < 2) {
+    return 1;
+  }
+  return n * (factorial(n-1))
+
+}
 
 // unit tests
 // do not modify the below code

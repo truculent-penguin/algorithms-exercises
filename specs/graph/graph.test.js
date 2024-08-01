@@ -23,16 +23,107 @@
     connections: [687, 997, 437]
   }
 */
+const { forEach } = require("lodash");
 const { getUser } = require("./jobs");
 
-const findMostCommonTitle = (myId, degreesOfSeparation) => {
-  // code goes here
+const findMostCommonTitle2 = (myId, degreesOfSeparation) => {
+  let currentUser = getUser(myId);
+  let queue = [currentUser];
+  let connectionQueue = []
+  let jobCount = {}
+  let usedConnections = []
+  // jobCount[currentUser.title] = 1
+
+  for (let i=0; i<=degreesOfSeparation; i++) {
+    while (queue.length) {
+      const person = queue.shift()
+
+      // add to tally
+      if (!jobCount[person.title]) {
+        jobCount[person.title] = 1
+      } else {
+        jobCount[person.title]++
+      }
+
+      // check if connection has already been added to the queue
+      for (let i=0; i<person.connections.length; i++) {
+        if (!usedConnections.includes(person.connections[i])) {
+          connectionQueue.push(person.connections[i]);
+          usedConnections.push(person.connections[i]);
+        }
+      }
+    }
+    while (connectionQueue.length) {
+      queue.push(getUser(connectionQueue.shift()))
+    }
+  }
+  // Figure out which job has the most results
+  let mostUsed = ["", 0];
+  const jobsAndUses = Object.entries(jobCount);
+  for (let i=0; i<jobsAndUses.length; i++) {
+    if (jobsAndUses[i][1] > mostUsed[1]) {
+      mostUsed = jobsAndUses[i]
+    }
+  }
+  
+  return mostUsed[0]
 };
+
+// Instructor Solution
+const findMostCommonTitle = (myId, degreesOfSeparation) => {
+  let queue = [myId];
+  // Sets -- can give array of things to seed data with
+  const seen = new Set(queue)
+  const jobs = {}
+
+  for (let i = 0; i <= degreesOfSeparation; i++) {
+    const newQueue = [];
+    while (queue.length) {
+      const user = getUser(queue.shift())
+
+      // queue up the next iteration
+      for (let j=0; j < user.connections.length; j++) {
+        const connection = user.connections[j];
+        if (!seen.has(connection)) {
+          newQueue.push(connection);
+          seen.add(connection);
+        }
+      }
+
+      // if seen job before, add 1 to count. if haven't seen, set job title equal to 1
+      jobs[user.title] = jobs[user.title] ? jobs[user.title] + 1 : 1;
+    }
+    // queuing up next level of connections
+    queue = newQueue;
+  }
+  // turn job object into sorted list
+  const jobKeys = Object.keys(jobs);
+
+  let biggestNumber = jobs[jobKeys[0]];
+  let jobName = jobKeys[0];
+
+  for (let i = 1; i < jobKeys.length; i++) {
+    const currentJob = jobKeys[i];
+    if (jobs[currentJob] > biggestNumber) {
+      jobName = currentJob;
+      biggestNumber = jobs[currentJob];
+    }
+  }
+    // see all job titles, sorted
+  // jobKeys
+  //   .map((id) => [id, jobs[id]])
+  //   .sort((a, b) => b[1] - a[1])
+  //   .slice(0, 10)
+  //   .forEach(([job, num]) => console.log(`${num} – ${job}`));
+
+  // console.log("======");
+
+  return jobName;
+}
 
 // unit tests
 // do not modify the below code
-test.skip("findMostCommonTitle", function () {
-  // the getUser function and data comes from this CodePen: https://codepen.io/btholt/pen/NXJGwa?editors=0010
+describe.skip("findMostCommonTitle", function () {
   test("user 30 with 2 degrees of separation", () => {
     expect(findMostCommonTitle(30, 2)).toBe("Librarian");
   });
@@ -48,7 +139,7 @@ test.skip("findMostCommonTitle", function () {
   });
 });
 
-test.skip("extra credit", function () {
+describe.skip("extra credit", function () {
   test("user 1 with 7 degrees of separation – this will traverse every user that's followed by someone else. five users are unfollowed", () => {
     expect(findMostCommonTitle(1, 7)).toBe("Geological Engineer");
   });

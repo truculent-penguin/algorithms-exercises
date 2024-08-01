@@ -13,7 +13,38 @@
 */
 
 function quickSort(nums) {
-  // code goes here
+
+  // base case
+  if (nums.length < 2) {
+    return nums;
+  }
+
+  // Choose Pivot 
+  const pivot = nums[nums.length - 1]
+
+  // split remaining items into left and right array
+  let leftArray = []
+  let rightArray = []
+
+  // pivot is last number so don't want to capture it (why nums.length - 1)
+  for (let i=0; i<nums.length - 1; i++) {
+    if (nums[i] <= pivot) {
+      leftArray.push(nums[i])
+    } else {
+      rightArray.push(nums[i])
+    }
+  }
+
+  // Call quickSort on leftArray & rightArray
+  const sortedLeft = quickSort(leftArray);
+  const sortedRight = quickSort(rightArray);
+
+
+  return sortedLeft.concat(pivot, sortedRight)
+
+  // can combine above three steps with spread operator
+  // return [...quickSort(leftArray), pivot, ...quickSort(rightArray)]
+
 }
 
 // unit tests

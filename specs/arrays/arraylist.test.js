@@ -18,7 +18,45 @@
 */
 
 class ArrayList {
-  // code goes here
+  constructor() {
+    this.data = {};
+    this.length = 0
+  }
+
+  push(value) {
+    // add item to end of object
+    this.data[this.length] = value
+    this.length++
+  }
+
+  pop() {
+    // removes last item in object
+    const response = this.data[this.length - 1];
+    delete this.data[this.length - 1];
+    this.length--
+    return response;
+  }
+
+  get(index) {
+    return this.data[index]
+  }
+
+  delete(index) {
+    // removes item from array
+    // collapses the array -- shift everything over
+    const response = this.data[index]
+    this._collapseTo(index)
+    return response;
+  }
+
+  // Private method
+  _collapseTo(index) {
+    for (let i=index; i<this.length; i++) {
+      this.data[i] = this.data[i + 1];
+    }
+    delete this.data[this.length - 1];
+    this.length--;
+  }
 }
 
 // unit tests

@@ -16,8 +16,114 @@
 // the way I did. however feel free to use it if you'd like
 const logMaze = require("./logger");
 
+const NO_ONE = 0;
+const BY_A = 1;
+const BY_B = 2;
+
+// 1. Create grid that is same size as maze but can add objects to
+// creating own data structure from array of arrays given
+function generateVisited(maze) {
+  const visited = [];
+  for (let y = 0; y < maze.length; y++) {
+    const yAxis = [];
+    for (let x = 0; x < maze[y].length; x++) {
+      const coordinate = {
+        closed: maze[y][x] === 1,
+        length: 0,
+        openedBy: NO_ONE,
+        x,
+        y
+      }
+      yAxis.push(coordinate);
+    }
+    visited.push(yAxis);
+  }
+  return visited;
+}
+
 function findShortestPathLength(maze, [xA, yA], [xB, yB]) {
-  // code goes here
+  const visited = generateVisited(maze);
+  visited[yA][xA].openedBy = BY_A;
+  visited[yB][xB].openedBy = BY_B;
+
+  let aQueue = [visited[yA][xA]];
+  let bQueue = [visited[yB][xB]]
+
+  let iteration = 0;
+
+  while (aQueue.length && bQueue.length) {
+    iteration++;
+    let aNeighbors = []
+
+    // gather A neighbors
+    while (aQueue.length) {
+      const coordinate = aQueue.shift()
+      aNeighbors = aNeighbors.concat(getNeighbors(visited, coordinate.x, coordinate.y))
+    }
+
+    // process A neighbors
+    for (let i = 0; i < aNeighbors.length; i++) {
+      const neighbor = aNeighbors[i];
+      if (neighbor.openedBy === BY_B) {
+        return neighbor.length + iteration;
+      } else if (neighbor.openedBy === NO_ONE) {
+        neighbor.length = iteration;
+        neighbor.openedBy = BY_A;
+        aQueue.push(neighbor);
+      }
+    }
+
+    let bNeighbors = []
+
+    // gather B neighbors
+    while (bQueue.length) {
+      const coordinate = bQueue.shift()
+      bNeighbors = bNeighbors.concat(getNeighbors(visited, coordinate.x, coordinate.y))
+    }
+
+    // process B neighbors
+    for (let i = 0; i < bNeighbors.length; i++) {
+      const neighbor = bNeighbors[i];
+      if (neighbor.openedBy === BY_A) {
+        return neighbor.length + iteration;
+      } else if (neighbor.openedBy === NO_ONE) {
+        neighbor.length = iteration;
+        neighbor.openedBy = BY_B;
+        bQueue.push(neighbor);
+      }
+    }
+
+    
+  }
+
+  // didn't find a path / no path
+  return -1;
+  console.log(visited)
+}
+
+// if i give you coordinate of x, y => give me back neighbors of that item
+function getNeighbors(visited, x, y) {
+  const neighbors = []
+
+  // check that not going out of bounds & that haven't visited coordinate
+  if (y - 1 >= 0 && !visited[y-1][x].closed) {
+    // left
+    neighbors.push(visited[y-1][x])
+  }
+  if (y + 1 < visited[0].length && !visited[y+1][x].closed) {
+    // right
+    neighbors.push(visited[y+1][x])
+  }
+  if (x - 1 >= 0 && !visited[y][x - 1].closed) {
+    // up
+    neighbors.push(visited[y][x - 1])
+  }
+  if (x + 1 < visited.length && !visited[y][x + 1].closed) {
+    // down
+    neighbors.push(visited[y][x + 1])
+  }
+
+  return neighbors;
 }
 
 // there is a visualization tool in the completed exercise
@@ -56,8 +162,8 @@ describe.skip("pathfinding – happy path", function () {
     [0, 0, 0, 0, 0, 1, 0, 0],
     [0, 0, 0, 1, 0, 1, 1, 0],
     [0, 0, 0, 0, 0, 0, 1, 0],
-    [0, 2, 0, 0, 0, 0, 1, 0],
-    [0, 0, 0, 0, 0, 0, 1, 2]
+    [0, 0, 0, 0, 0, 0, 1, 0],
+    [0, 2, 0, 0, 0, 0, 1, 2]
   ];
   it("should solve a 8x8 maze", () => {
     expect(findShortestPathLength(eightByEight, [1, 7], [7, 7])).toEqual(16);
